@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.myproject.iw2ebetter.mapper.ResponseMapper">
+    <resultMap id="response" type="com.myproject.iw2ebetter.pojo.Response">
+        <id property="reid" column="reid"></id>
+        <result property="content" column="content"></result>
+        <result property="responseTime" column="response_time"></result>
+        <result property="available" column="available"></result>
+        <association property="user" javaType="com.myproject.iw2ebetter.pojo.UserDTO">
+            <id property="uid" column="uid"></id>
+            <result property="name" column="name"></result>
+            <result property="src" column="src"></result>
+        </association>
+        <association property="appraise" javaType="com.myproject.iw2ebetter.pojo.Appraise">
+            <id property="aid" column="aid"></id>
+            <result property="title" column="title"></result>
+        </association>
+    </resultMap>
+
+    <select id="getAllResponsesByEnable" resultMap="response">
+        select r.reid,r.content,r.response_time,r.available,u.uid,u.name,a.aid,a.title
+        from responses r,users u,appraises a
+        where r.available = #{enable}
+        and r.uid = u.uid
+        and r.aid = a.aid
+    </select>
+
+    <select id="getAllResponses" resultMap="response">
+        select r.reid,r.content,r.response_time,r.available,u.uid,u.name,a.aid,a.title
+        from responses r,users u,appraises a
+        where r.uid = u.uid
+        and r.aid = a.aid
+    </select>
+
+    <select id="getResponseByReid" resultMap="response">
+        select r.reid,r.content,r.response_time,r.available,u.uid,u.name,u.src,a.aid,a.title
+        from responses r,users u,appraises a
+        where r.uid = u.uid
+        and r.aid = a.aid
+        and reid = #{reid}
+    </select>
+
+    <update id="updateResponseContentAndTimeByReid" keyProperty="reid">
+        update responses
+        <set>
+            <if test="content != null">
+                set content = #{content},
+            </if>
+            <if test="modifyTime != null">
+                set response_time = #{modifyTime}
+            </if>
+        </set>
+        <where>
+            reid = #{reid}
+        </where>
+    </update>
+
+    <insert id="insertResponse" keyProperty="reid" useGeneratedKeys="true">
+        insert into responses(content,response_time,uid,aid)
+        values(#{content},#{responseTime},#{user.uid},#{appraise.aid})
+    </insert>
+
+    <select id="getAllResponsesByUid" resultMap="response">
+        select r.reid,r.content,r.response_time,r.available,u.uid,u.name,a.aid,a.title
+        from responses r,users u,appraises a
+        where r.uid = u.uid
+        and r.aid = a.aid
+        and r.uid = #{uid}
+        order by r.available
+    </select>
+
+    <select id="getResponsesByAid" resultMap="response">
+        select r.reid,r.content,r.response_time,r.available,u.uid,u.name,u.src,a.aid,a.title
+        from responses r,users u,appraises a
+        where r.uid = u.uid
+        and r.aid = a.aid
+        and r.aid = #{aid}
+        and r.available = true
+        order by r.response_time
+    </select>
+
+
+
+</mapper>

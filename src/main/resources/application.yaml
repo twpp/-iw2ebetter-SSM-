@@ -1,0 +1,60 @@
+#数据库mysql配置
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+#    本地环境
+    url: jdbc:mysql://localhost:3306/iw2ebetter?characterEncoding=utf-8
+    username: root
+    password: 123456
+
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      aop-patterns: iw2ebetter.* #查看spring监控的
+      filters: stat,wall
+
+      stat-view-servlet: #监控功能相关
+        login-username: 'admin'
+        login-password: 'admin'
+        enabled: true #启动监控功能的
+      web-stat-filter: #web监控的
+        enabled: true
+        url-pattern: /*
+        exclusions: '*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*'
+        #具体filter的设置
+      filter:
+        stat:
+          enabled: true
+        wall:
+          config:
+            insert-allow: false
+
+
+  redis:
+    host:
+    password:
+    client-type: jedis
+    database: 1
+  thymeleaf:
+    cache: false
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: true
+  servlet:
+    multipart:
+      max-file-size: 25MB
+      max-request-size: 250MB    #一次请求文件总大小最大值
+  cache:
+    type: redis
+
+mybatis:
+  mapper-locations: classpath*:mapper/*.xml
+
+logging:
+  level:
+    com.myproject.iw2ebetter.mapper: debug
+
+pagehelper:
+  helper-dialect: mysql
+  reasonable: true
+  support-methods-arguments: true

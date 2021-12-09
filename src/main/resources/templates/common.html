@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="common">
+    <link href="css/style.css" th:href="@{/css/style.css}" rel="stylesheet">
+    <link href="css/style-responsive.css" th:href="@{/css/style-responsive.css}" rel="stylesheet">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="js/html5shiv.js" th:src="@{/js/html5shiv.js}"></script>
+    <script src="js/respond.min.js" th:src="@{/js/respond.min.js}"></script>
+    <![endif]-->
+</head>
+<body>
+
+<div id="left-menu" class="left-side sticky-left-side">
+
+
+    <!--logo and iconic logo start-->
+    <div class="logo">
+        <a th:href="@{/index}" href="index.html">IW2EBetter</a>
+    </div>
+    <div class="logo-icon text-center">
+        <a th:href="@{/index}" href="">IW2E
+            <br>
+            Better</a>
+    </div>
+
+
+
+
+    <div class="left-side-inner">
+
+        <!--sidebar nav start-->
+        <ul class="nav nav-pills nav-stacked custom-nav">
+            <li id="userMenu" class="menu-list"><a th:href="@{/index}"><i class="fa fa-info-circle"></i><span>个人信息管理</span></a>
+                <ul class="sub-menu-list">
+                    <li><a href="#" th:href="@{/userInfo/{username}(username=${#authentication.name})}">查看个人信息</a></li>
+                    <li><a href="#" th:href="@{/toUpdateInfo/{username}(username=${#authentication.name})}">编辑个人信息</a>
+                    </li>
+                    <li id="updatePwd"><a href="#" th:href="@{/toUpdatePwd}">修改密码</a></li>
+                </ul>
+            </li>
+
+            <li id="usersMenu" sec:authorize="hasRole('admin')" class="menu-list"><a href=""><i
+                    class="fa fa-user"></i><span>用户管理</span></a>
+                <ul class="sub-menu-list">
+                    <li><a th:href="@{/users}"> 用户列表</a></li>
+                </ul>
+            </li>
+
+            <li id="square" class="menu-list"><a href=""><i class="fa fa-book"></i><span>广场</span></a>
+                <ul class="sub-menu-list">
+                    <li><a href="timeline.html"> 今日最热</a></li>
+                    <li><a href="#" th:href="@{/toSquare}"> 广场</a></li>
+                </ul>
+            </li>
+
+            <li id="aandr"class="menu-list"><a href=""><i
+                    class="fa fa-pencil"></i><span>点评与回复管理</span></a>
+                <ul class="sub-menu-list">
+                    <li><a sec:authorize="hasRole('admin')" href="#" th:href="@{/appraise/disableAppraiseList}">
+                        点评审核</a></li>
+                    <li><a sec:authorize="hasRole('admin')" href="#" th:href="@{/appraise/ableAppraiseList}"> 已审点评</a>
+                    </li>
+                    <li><a sec:authorize="hasRole('admin')" href="#" th:href="@{/response/disableResponseList}">
+                        回复审核</a></li>
+                    <li><a sec:authorize="hasRole('admin')" href="#" th:href="@{/response/ableResponseList}"> 已审回复</a>
+                    </li>
+                    <li><a th:href="@{/appraise/myAppraiseList}" id="myAppraises"> 我的点评</a></li>
+                    <li><a th:href="@{/response/myResponseList}" id="myResponses"> 我的回复</a></li>
+                </ul>
+            </li>
+            <li><a th:href="@{/toLogin}"><i class="fa fa-sign-in"></i> <span>Login Page</span></a></li>
+        </ul>
+        <!--sidebar nav end-->
+
+    </div>
+</div>
+
+<div id="header" class="header-section">
+
+    <a class="toggle-btn"><i class="fa fa-bars"></i></a>
+
+    <div class="menu-right">
+        <ul class="notification-menu">
+            <li>
+                <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                    <img id="avatar" class="img-circle" alt="头像"/>
+                    <code id="name"></code>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-usermenu pull-right">
+                    <li><a href="#" th:href="@{/userInfo/{username}(username=${#authentication.name})}"><i
+                            class="fa fa-user"></i> 个人信息</a></li>
+                    <li><a href="#" th:href="@{/logout}"><i class="fa fa-sign-out"></i> Log Out</a></li>
+                </ul>
+            </li>
+
+        </ul>
+    </div>
+    <!--notification menu end -->
+
+</div>
+
+<footer class="text-center footer" id="footer">
+            管理员电话：16666666666
+</footer>
+<div id="footer_js">
+    <script src="js/jquery-1.10.2.min.js" th:src="@{/js/jquery-1.10.2.min.js}"></script>
+    <script src="js/jquery-ui-1.9.2.custom.min.js" th:src="@{/js/jquery-ui-1.9.2.custom.min.js}"></script>
+    <script src="js/jquery-migrate-1.2.1.min.js" th:src="@{/js/jquery-migrate-1.2.1.min.js}"></script>
+    <script src="js/bootstrap.min.js" th:src="@{/js/bootstrap.min.js}"></script>
+    <script src="js/modernizr.min.js" th:src="@{/js/modernizr.min.js}"></script>
+    <!--   这个是侧滚栏样式的-->
+    <script src="js/jquery.nicescroll.js" th:src="@{/js/jquery.nicescroll.js}"></script>
+    <script src="js/scripts.js" th:src="@{/js/scripts.js}"></script>
+</div>
+
+<script id="init">
+
+    $(function () {
+        $.ajax({
+            url: "/getUser",
+            success: function (result) {
+                $("#avatar").attr("src", result.data.user.src);
+                $("#name").text(result.data.user.name);
+            }
+        })
+    });
+
+</script>
+
+<script id="function">
+    function bulidPagination(result) {
+        $("#pagination").empty();
+        var pageInfo = result.data.pageInfo;
+
+        var pageUl = $("<ul></ul>").addClass("pagination");
+        var firstPageLi = $("<li></li>").append("<a>首页</a>");
+        firstPageLi.click(function () {
+            to_page(1);
+        });
+        var prePageLi = $("<li></li>").append("<a>&laquo;</a>");
+        prePageLi.click(function () {
+            to_page(pageInfo.prePage);
+        });
+        if (pageInfo.hasPreviousPage == false) {
+            firstPageLi.addClass("disabled");
+            prePageLi.addClass("disabled");
+        }
+        pageUl.append(firstPageLi).append(prePageLi);
+        var lastPageLi = $("<li></li>").append("<a>末页</a>");
+        var nextPageLi = $("<li></li>").append("<a>&raquo;</a>");
+        lastPageLi.click(function () {
+            to_page(pageInfo.pages);
+        });
+        nextPageLi.click(function () {
+            to_page(pageInfo.nextPage);
+        });
+        if (pageInfo.hasNextPage == false) {
+            lastPageLi.addClass("disabled");
+            nextPageLi.addClass("disabled");
+        }
+        //页码主体
+        $.each(pageInfo.navigatepageNums, function (index, item) {
+            var num = $("<li></li>").append("<a>" + item + "</a>");
+            if (pageInfo.pageNum == item) {
+                num.addClass("active");
+            }
+            num.click(function () {
+                to_page(item);
+            });
+            pageUl.append(num);
+        });
+
+        pageUl.append(nextPageLi).append(lastPageLi);
+        $("<nav></nav>").append(pageUl).appendTo("#pagination");
+    }
+
+    function buildPageInfo(result) {
+        //避免单击下一页 会有数据叠加 毕竟我们没有刷新页面
+        $("#pageInfo").empty();
+        var pageInfo = result.data.pageInfo;
+        $("#pageInfo").append("当前第" + pageInfo.pageNum + "页，总" + pageInfo.pages + "页，共" + pageInfo.total + "条记录");
+    }
+
+    //日期格式化 函数 因为js拼字符串不可以使用thymeleaf语法
+    Date.prototype.format = function (fmt) {
+        var o = {
+            "M+": this.getMonth() + 1,                 //月份
+            "d+": this.getDate(),                    //日
+            "h+": this.getHours(),                   //小时
+            "m+": this.getMinutes(),                 //分
+            "s+": this.getSeconds(),                 //秒
+            "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+            "S": this.getMilliseconds()             //毫秒
+        };
+
+        if (/(y+)/.test(fmt)) {
+            fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+        }
+
+        for (var k in o) {
+            if (new RegExp("(" + k + ")").test(fmt)) {
+                fmt = fmt.replace(
+                    RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+            }
+        }
+
+        return fmt;
+    };
+
+    $(function () {
+        to_page(1);
+    });
+</script>
+
+<script id="appraiseAndResponseNav">
+    $(function () {
+        //控制菜单不关闭
+        $("#userMenu").removeClass("nav-active");
+        $("#usersMenu").removeClass("nav-active");
+        $("#square").removeClass("nav-active");
+        $("#aandr").removeClass("nav-active");
+
+        $("#aandr").addClass("nav-active");
+    })
+</script>
+
+<script id="usersNav">
+    $(function () {
+        //控制菜单不关闭
+        $("#userMenu").removeClass("nav-active");
+        $("#usersMenu").removeClass("nav-active");
+        $("#square").removeClass("nav-active");
+        $("#aandr").removeClass("nav-active");
+
+        $("#usersMenu").addClass("nav-active");
+    })
+</script>
+
+<script id="userNav">
+    $(function () {
+        //控制菜单不关闭
+        $("#userMenu").removeClass("nav-active");
+        $("#usersMenu").removeClass("nav-active");
+        $("#square").removeClass("nav-active");
+        $("#aandr").removeClass("nav-active");
+
+        $("#userMenu").addClass("nav-active");
+    })
+</script>
+
+<script id="squareNav">
+    $(function () {
+        //控制菜单不关闭
+        $("#userMenu").removeClass("nav-active");
+        $("#usersMenu").removeClass("nav-active");
+        $("#square").removeClass("nav-active");
+        $("#aandr").removeClass("nav-active");
+
+        $("#square").addClass("nav-active");
+    })
+</script>
+
+<script>
+    $("#updatePwd").click(function (){
+        $("#myModal").modal({
+            backdrop:true
+        })
+    })
+</script>
+</body>
+</html>

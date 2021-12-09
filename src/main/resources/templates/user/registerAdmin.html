@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="ThemeBucket">
+    <link rel="shortcut icon" href="#" type="image/png">
+
+    <title>Registration</title>
+
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/style-responsive.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="js/html5shiv.js"></script>
+    <script src="js/respond.min.js"></script>
+    <![endif]-->
+    <script>
+        function validate() {
+            var usernameRex = /\w{4,}/;
+            var passwordRex = /\w{5,}/;
+            var telRex = /1([358][0-9]|4[579]|66|7[0135678]|9[89])[0-9]{8}/;
+
+            var username = $("#username").val();
+            var telephone = $("#telephone").val();
+            var password = $("#password").val();
+            var pwd_again = $("#password_again").val();
+            var uv = usernameRex.test(username);
+            var pv = passwordRex.test(password);
+            var tv = telRex.test(telephone);
+            var pav = passwordRex.test(pwd_again);
+
+            $("#submit").attr("disabled", true);
+            if (!uv) {
+                $("#user-name-label").text("用户名不合法");
+                $("#username_div").removeClass().addClass("has-error");
+            } else {
+                if (backQuery(username)) {
+                    $("#username_div").removeClass().addClass("has-error");
+                    $("#user-name-label").text("用户名已存在");
+                } else {
+                    $("#username_div").removeClass().addClass("has-success");
+                    $("#user-name-label").text("用户名合法");
+                }
+            }
+
+            if (!tv) {
+                $("#telephone-label").text("电话号码不合法");
+                $("#telephone_div").removeClass().addClass("has-error");
+            } else {
+                $("#telephone_div").removeClass().addClass("has-success");
+                $("#telephone-label").text("电话号码合法");
+            }
+
+            if (!pv) {
+                $("#password-label").text("密码不合法");
+                $("#password_div").removeClass().addClass("has-error");
+            } else {
+                $("#password_div").removeClass().addClass("has-success");
+                $("#password-label").text("密码合法");
+            }
+
+            if (!pav) {
+                $("#password-again-label").text("密码不合法");
+                $("#password_again_div").removeClass().addClass("has-error");
+            } else {
+                if (password != pwd_again) {
+                    $("#password_again_div").removeClass().addClass("has-error");
+                    $("#password-again-label").text("两次密码不一致");
+                } else {
+                    $("#password_again_div").removeClass().addClass("has-success");
+                    $("#password-again-label").text("密码一致");
+                }
+            }
+
+            if (uv && tv && pv && pav && password === pwd_again) {
+                $("#username_div").removeClass().addClass("has-success");
+                $("#password_div").removeClass().addClass("has-success");
+                $("#telephone_div").removeClass().addClass("has-success");
+                $("#password_again_div").removeClass().addClass("has-success");
+                $("#user-name-label").text("用户名合法");
+                $("#telephone-label").text("电话号码合法");
+                $("#password-label").text("密码合法");
+                $("#password-again-label").text("密码一致");
+                $("#submit").attr("disabled", false);
+            }
+        }
+
+        function backQuery(username) {
+            var res = false;
+            $.ajax({
+                url: "/usernameIsExisted",
+                //async: false 这个呀会将方法弄成 同步地
+                async: false,
+                data: {
+                  username:username
+                },
+                success: function (result) {
+                    res = result;
+                }
+            });
+            return res;
+        }
+    </script>
+
+</head>
+
+<body class="login-body">
+
+<div class="container">
+
+    <form class="form-signin" th:action="@{/register/admin}" method="post">
+        <div class="form-signin-heading text-center">
+            <h1 class="sign-title">注册</h1>
+        </div>
+        <div class="login-wrap">
+            <p>输入您的信息如下</p>
+            <div id="username_div" class="has-error">
+                <label class="control-label" for="username" id="user-name-label"></label>
+                <input type="text" class="form-control" autofocus="" id="username" name="username" placeholder="用户名"
+                       required="" th:onblur="validate()">
+            </div>
+            <div id="telephone_div" class="has-error">
+                <label class="control-label" for="telephone" id="telephone-label"></label>
+                <input type="text" autofocus="" id="telephone" name="telephone" placeholder="电话" class="form-control"
+                       required="" th:onblur="validate()">
+            </div>
+            <div id="password_div" class="has-error">
+                <label class="control-label" for="password" id="password-label"></label>
+                <input type="password" name="password" id="password" placeholder="密码" class="form-control" required=""
+                       th:onblur="validate()">
+            </div>
+            <div id="password_again_div" class="has-error">
+                <label class="control-label" for="password_again" id="password-again-label"></label>
+                <input type="password" placeholder="确认密码" id="password_again" class="form-control" required=""
+                       th:onblur="validate()">
+            </div>
+            <button type="submit" id="submit" th:onclick="validate()" class="btn btn-lg btn-login btn-block">
+                <i class="fa fa-check"></i>
+            </button>
+            <div class="registration">
+                已经注册。
+                <a href="/toLogin" class="">
+                    去登陆
+                </a>
+            </div>
+
+        </div>
+    </form>
+</div>
+
+
+<!-- Placed js at the end of the document so the pages load faster -->
+
+<!-- Placed js at the end of the document so the pages load faster -->
+<script src="js/jquery-1.10.2.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/modernizr.min.js"></script>
+
+</body>
+</html>

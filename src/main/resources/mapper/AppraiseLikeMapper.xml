@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.myproject.iw2ebetter.mapper.AppraiseLikeMapper">
+    <resultMap id="appraiseLike" type="com.myproject.iw2ebetter.pojo.AppraiseLike">
+        <id property="id" column="id"></id>
+        <result property="aid" column="aid"></result>
+        <result property="uid" column="uid"></result>
+        <result property="status" column="status"></result>
+    </resultMap>
+
+    <insert id="save" keyProperty="id" useGeneratedKeys="true">
+        insert into appraise_like(aid,uid,status) values(#{aid},#{uid},#{status});
+    </insert>
+
+    <insert id="saveAll" keyProperty="id" useGeneratedKeys="true">
+        insert into  appraise_like(aid,uid,status)
+        value
+        <foreach collection="list" separator="," item="appraiseLike">
+            (
+            #{appraiseLike.aid},#{appraiseLike.uid},#{appraiseLike.status}
+            )
+        </foreach>
+    </insert>
+
+    <select id="findByAidAndStatus" resultMap="appraiseLike">
+        select id,uid,aid,status from appraise_like where aid = #{aid} and status = #{status}
+    </select>
+
+    <select id="findByUidAndStatus" resultMap="appraiseLike">
+        select id,uid,aid,status from appraise_like where aid = #{uid} and status = #{status}
+    </select>
+
+    <select id="findByAidAndUid" resultMap="appraiseLike">
+        select id,uid,aid,status from appraise_like where aid = #{uid} and uid = #{uid}
+    </select>
+
+
+
+</mapper>

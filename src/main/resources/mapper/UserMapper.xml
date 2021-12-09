@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.myproject.iw2ebetter.mapper.UserMapper">
+    <resultMap id="user2role" type="com.myproject.iw2ebetter.pojo.UserDTO">
+        <id property="uid" column="uid"></id>
+        <result property="username" column="username"></result>
+        <result property="password" column="password"></result>
+        <result property="name" column="name"></result>
+        <result property="telephone" column="telephone"></result>
+        <result property="enable" column="enable"></result>
+        <result property="address" column="address"></result>
+        <result property="src" column="src"></result>
+        <collection property="roles" ofType="com.myproject.iw2ebetter.pojo.RoleDTO">
+            <id property="rid" column="rid"></id>
+            <result property="role" column="role"></result>
+        </collection>
+    </resultMap>
+    
+    <select id="getUserByUsername" resultMap="user2role">
+        select u.uid,u.username,u.telephone,u.name,u.password,u.enable,u.address,u.src,r.rid,r.role
+        from users u, roles r, user2role u2r
+        where u.username = #{username}
+        and u.uid = u2r.uid
+        and r.rid = u2r.rid
+    </select>
+
+    <select id="getUserByUid" resultMap="user2role">
+        select u.uid,u.username,u.password,u.telephone,u.password,u.name,u.enable,u.address,u.src,r.rid,r.role
+        from users u, roles r, user2role u2r
+        where u.uid = #{uid}
+        and u.uid = u2r.uid
+        and r.rid = u2r.rid
+    </select>
+
+    <insert id="insertUser" useGeneratedKeys="true" keyProperty="uid">
+        insert into users(username,password,telephone,`name`) values(#{username},#{password},#{telephone},#{username})
+    </insert>
+
+</mapper>

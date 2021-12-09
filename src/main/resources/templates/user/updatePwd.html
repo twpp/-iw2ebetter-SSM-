@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:insert="common :: common">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="keywords"
+          content="admin, dashboard, bootstrap, template, flat, modern, theme, responsive, fluid, retina, backend, html5, css, css3">
+    <meta name="description" content="">
+    <meta name="author" content="ThemeBucket">
+    <link rel="shortcut icon" href="#" type="image/png">
+
+    <title>主页</title>
+
+
+</head>
+
+<body class="sticky-header">
+
+<section>
+    <div th:replace="common::#left-menu"></div>
+
+    <!-- main content start-->
+    <div class="main-content">
+        <div th:replace="common::#header"></div>
+        <div class="wrapper">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="panel panel-success">
+                        <div class="panel-heading text-center">修改密码</div>
+                        <div class="panel-body">
+                            <form class="form" th:action="@{/updatePwd}" method="get">
+                                <div id="oldPwd_div" class="has-error">
+                                    <label class="control-label" th:text="${message}"></label>
+                                    <input type="password" class="form-control" autofocus="" id="oldPwd"
+                                           name="oldPwd"
+                                           placeholder="旧密码"
+                                           required="" th:onblur="validate()">
+                                </div>
+                                <div id="newPwd_div" class="has-error">
+                                    <label class="control-label" for="newPwd" id="newPwd-label"></label>
+                                    <input type="password" autofocus="" id="newPwd" name="newPwd" placeholder="新密码"
+                                           class="form-control"
+                                           required="" th:onblur="validate()">
+                                </div>
+                                <div id="again_div">
+                                    <label class="control-label" for="again" id="again-label"></label>
+                                    <input type="password" name="again" id="again" placeholder="再次输入新密码"
+                                           class="form-control" th:onblur="validate()">
+                                </div>
+                                <button type="submit" id="submit" th:onclick="return confirmUpdate()"
+                                        class="btn btn-lg btn-success btn-block">
+                                    <i class="fa fa-check"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div th:replace="common :: #footer"></div>
+    </div>
+
+    <!-- main content end-->
+</section>
+<div th:replace="common::#footer_js"></div>
+<script th:replace="common::#init"></script>
+<script th:replace="common::#userNav"></script>
+<script>
+    function validate() {
+        var pwdRex = /\w{5,}/;
+
+        var newPwd = $("#newPwd").val();
+        var pwdAgain = $("#again").val();
+        var pv = pwdRex.test(newPwd);
+        var pav = pwdRex.test(pwdAgain);
+
+        $("#submit").attr("disabled", true);
+        if (!pv) {
+            $("#newPwd-label").text("密码不合法");
+            $("#newPwd_div").removeClass("has-success").addClass("has-error");
+        } else {
+            $("#newPwd_div").removeClass("has-error").addClass("has-success");
+            $("#newPwd-label").text("密码合法");
+        }
+
+        if (!pav) {
+            $("#again-label").text("密码不合法");
+            $("#again_div").removeClass("has-success").addClass("has-error");
+        } else {
+            if (pwdAgain === newPwd) {
+                $("#again_div").removeClass("has-error").addClass("has-success");
+                $("#again-label").text("密码一致");
+            } else {
+                $("#again-label").text("密码不合法");
+                $("#again_div").removeClass("has-success").addClass("has-error");
+            }
+        }
+
+
+        if (pav && pv && newPwd === pwdAgain) {
+            $("#newPwd_div").removeClass("has-error").addClass("has-success");
+            $("#password_again_div").removeClass("has-error").addClass("has-success");
+            $("#newPwd-label").text("密码合法");
+            $("#again-label").text("密码一致");
+            $("#submit").attr("disabled", false);
+        }
+    }
+
+    function confirmUpdate() {
+        var res = confirm("您确定要修改密码？");
+        if (res == false) {
+            return false;
+        }
+    }
+</script>
+</body>
+</html>

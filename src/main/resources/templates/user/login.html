@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="ThemeBucket">
+    <link rel="shortcut icon" href="#" type="image/png">
+
+    <title>登陆</title>
+
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+    <!-- 响应式样式 -->
+    <link th:href="@{/css/style-responsive.css}" rel="stylesheet">
+
+    <!-- js IE8支持HTML5元素和媒体查询 IE 兼容脚本 -->
+    <!--[if lt IE 9]>
+    <script th:src="@{/js/html5shiv.js}"></script>
+    <script th:src="@{/js/respond.min.js}"></script>
+    <![endif]-->
+    <script>
+        function validate() {
+            var username = $("#username").val();
+            var password = $("#password").val();
+            var usernameReg = /\w{4,}/;
+            var passwordReg = /\w{5,}/;
+            var username_div = $("#username_div");
+            var password_div = $("#password_div");
+
+            username_div.removeClass();
+            password_div.removeClass();
+            $("#submit").attr("disabled",false);
+            if (!usernameReg.test(username) && !passwordReg.test(password)) {
+                username_div.addClass("has-error");
+                $("#user-name-label").text("用户名不合法");
+
+                password_div.addClass("has-error");
+                $("#password-label").text("密码不合法");
+                $("#submit").attr("disabled",true);
+            } else if (!usernameReg.test(username) && passwordReg.test(password)) {
+                username_div.addClass("has-error");
+                $("#user-name-label").text("用户名不合法");
+
+                password_div.addClass("has-success");
+                $("#password-label").text("密码合法");
+                $("#submit").attr("disabled",true);
+            } else if(usernameReg.test(username) && !passwordReg.test(password)){
+                username_div.addClass("has-success");
+                $("#user-name-label").text("用户名合法");
+
+                password_div.addClass("has-error");
+                $("#password-label").text("密码不合法");
+                $("#submit").attr("disabled",true);
+            }else{
+                username_div.addClass("has-success");
+                $("#user-name-label").text("用户名合法");
+
+                password_div.addClass("has-success");
+                $("#password-label").text("密码合法");
+                $("#submit").attr("disabled",false);
+            }
+        }
+    </script>
+</head>
+
+<body class="login-body">
+
+<div class="container">
+    <form class="form-signin" th:action="@{/toLogin}" method="post">
+        <div class="form-signin-heading text-center">
+            <h1 class="sign-title">登录iw2ebetter</h1>
+        </div>
+        <div class="login-wrap">
+            <div class="has-error">
+                <label class="control-label" id="message" ></label>
+            </div>
+            <div id="username_div" class="has-error">
+                <label class="control-label" for="username" id="user-name-label" th:text="${message}"></label>
+                <input type="text" class="form-control" name="username" placeholder="用户名" id="username" required="" th:onblur="validate()" autofocus>
+            </div>
+
+            <div id="password_div" class="has-error">
+                <label class="control-label" for="password" id="password-label"></label>
+                <input type="password" class="form-control" name="password" placeholder="密码" id="password" required="" th:onblur="validate()" autofocus>
+            </div>
+
+            <button id="submit" class="form-control btn btn-lg btn-login btn-block" th:onclick="validate()" type="submit">
+                <i class="fa fa-check"></i>
+            </button>
+            <div class="registration">
+                还没有账号?
+                <a class="" th:href="@{/toRegister}">
+                    去注册
+                </a>
+            </div>
+<!--            <label class="checkbox">-->
+<!--                <input type="checkbox" name="remember-me"> 记住我-->
+<!--            </label>-->
+        </div>
+    </form>
+</div>
+
+
+<!-- Placed js at the end of the document so the pages load faster -->
+
+<!-- Placed js at the end of the document so the pages load faster -->
+<script th:src="@{/js/jquery-1.10.2.min.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}"></script>
+<script th:src="@{/js/modernizr.min.js}"></script>
+
+
+</body>
+</html>

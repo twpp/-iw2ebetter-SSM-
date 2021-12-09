@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:insert="common :: common">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="keywords"
+          content="admin, dashboard, bootstrap, template, flat, modern, theme, responsive, fluid, retina, backend, html5, css, css3">
+    <meta name="description" content="">
+    <meta name="author" content="ThemeBucket">
+    <link rel="shortcut icon" href="#" type="image/png">
+
+    <title>主页</title>
+
+
+</head>
+
+<body class="sticky-header">
+
+<section>
+    <div th:replace="common::#left-menu"></div>
+
+    <!-- main content start-->
+    <div class="main-content">
+        <div th:replace="common::#header"></div>
+        <div class="wrapper">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">个人基本信息</div>
+                        <div class="panel-body">
+                            <table>
+                                <tr>
+                                    <td><label>昵称</label>：</td>
+                                    <td><label th:text="${user.name}"></label></td>
+                                </tr>
+                                <tr>
+                                    <td><label>电话</label>：</td>
+                                    <td><label th:text="${user.telephone}"></label></td>
+                                </tr>
+                                <tr>
+                                    <td><label>居住地</label>：</td>
+                                    <td><label th:text="${user.address}"></label></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="panel panel-success">
+                        <div class="panel-heading">头像上传</div>
+                        <div class="panel-body">
+<!--                            <div class="col-md-2">-->
+<!--                                <img id="head_image" class="img-circle"/>-->
+<!--                            </div>-->
+                            <div>
+                                <form enctype="multipart/form-data" th:action="@{/uploadHeadImage}" method="post">
+                                    <div class="row-fluid">
+                                        <input type="file" id="head_image" name="head_image" class="col-md-9" accept="image/jpeg,image/png">
+                                        <button id="img_submit" type="submit" class="btn btn-success col-md-3">提交</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="panel panel-success">
+                        <div class="panel-heading text-center">修改</div>
+                        <div class="panel-body">
+                            <form class="form" th:action="@{/updateInfo/{username}(username=${#authentication.name})}"
+                                  method="post">
+                                <div id="name_div" class="has-error">
+                                    <label class="control-label" for="nickname" id="name-label"></label>
+                                    <input type="text" class="form-control" autofocus="" id="nickname"
+                                           name="name"
+                                           placeholder="昵称"
+                                           required="" th:onblur="validate()">
+                                </div>
+                                <div id="telephone_div" class="has-error">
+                                    <label class="control-label" for="telephone" id="telephone-label"></label>
+                                    <input type="text" autofocus="" id="telephone" name="telephone" placeholder="电话"
+                                           class="form-control"
+                                           required="" th:onblur="validate()">
+                                </div>
+                                <div id="address_div">
+                                    <label class="control-label" for="address" id="address-label"></label>
+                                    <input type="text" name="address" id="address" placeholder="居住地"
+                                           class="form-control" th:onblur="validate()">
+                                </div>
+                                <input type="hidden" value="put" name="_method">
+                                <button type="submit" id="submit" th:onclick="return confirmUpdate()"
+                                        class="btn btn-lg btn-success btn-block">
+                                    <i class="fa fa-check"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div th:replace="common :: #footer"></div>
+    </div>
+
+    <!-- main content end-->
+</section>
+<div th:replace="common::#footer_js"></div>
+<script th:replace="common::#userNav"></script>
+<script th:replace="common::#init"></script>
+<script>
+    function validate() {
+        var nameRex = /[\u4e00-\u9fa5_a-zA-Z0-9]+/;
+        var telRex = /1([358][0-9]|4[579]|66|7[0135678]|9[89])[0-9]{8}/;
+
+        var name = $("#nickname").val();
+        var telephone = $("#telephone").val();
+        var nv = nameRex.test(name);
+        var tv = telRex.test(telephone);
+
+        $("#submit").attr("disabled", true);
+        if (!nv) {
+            $("#name-label").text("昵称不合法");
+            $("#name_div").removeClass("has-success").addClass("has-error");
+        } else {
+            $("#name_div").removeClass("has-error").addClass("has-success");
+            $("#name-label").text("昵称合法");
+        }
+
+        if (!tv) {
+            $("#telephone-label").text("电话号码不合法");
+            $("#telephone_div").removeClass("has-success").addClass("has-error");
+        } else {
+            $("#telephone_div").removeClass("has-error").addClass("has-success");
+            $("#telephone-label").text("电话号码合法");
+        }
+
+        if (nv && tv) {
+            $("#name_div").removeClass("has-error").addClass("has-success");
+            $("#telephone_div").removeClass("has-error").addClass("has-success");
+            $("#name-label").text("昵称合法");
+            $("#telephone-label").text("电话号码合法");
+            $("#submit").attr("disabled", false);
+        }
+    }
+
+    function confirmUpdate() {
+        var res = confirm("您确定要修改信息这些信息");
+        if (res == false) {
+            return false;
+        }
+    }
+
+    $("#img_submit").click(function () {
+        var obj = document.getElementById("head_image");
+        var length = obj.files.length;
+        if(length == 0){
+            alert("图片不能为空!");
+            return false;
+        }
+        var file = obj.files[0];
+        var postfix = file.name.substr(file.name.lastIndexOf("."))
+        if(postfix !='.png' && postfix !='.jpg' && postfix !='.jpeg'){
+            alert("请检查上传的是否为图片!");
+            return false;
+        }
+        return true;
+    })
+</script>
+</body>
+</html>

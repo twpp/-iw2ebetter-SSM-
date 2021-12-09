@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.myproject.iw2ebetter.mapper.AppraiseMapper">
+    <resultMap id="appraise" type="com.myproject.iw2ebetter.pojo.Appraise">
+        <id property="aid" column="aid"></id>
+        <result property="title" column="title"></result>
+        <result property="content" column="content"></result>
+        <result property="createTime" column="create_time"></result>
+        <result property="available" column="available"></result>
+        <result property="likes" column="likes"></result>
+        <association property="user" javaType="com.myproject.iw2ebetter.pojo.UserDTO">
+            <id property="uid" column="uid"></id>
+            <result property="name" column="name"></result>
+            <result property="src" column="src"></result>
+        </association>
+    </resultMap>
+
+    <select id="getAllAppraisesByEnable" resultMap="appraise">
+        select a.aid,a.title,a.content,a.create_time,a.available,a.likes,u.uid,u.name,u.src
+        from appraises a,users u
+        where a.available = #{enable}
+        and a.uid = u.uid
+        order by a.create_time desc
+    </select>
+
+    <select id="getAllAppraises" resultMap="appraise">
+        select a.aid,a.title,a.content,a.create_time,a.available,u.uid,u.name,u.src
+        from appraises a,users u
+        where a.uid = u.uid
+    </select>
+
+    <select id="getAppraiseByAid" resultMap="appraise">
+        select a.aid,a.title,a.content,a.create_time,a.available,a.likes,u.uid,u.name,u.src
+        from appraises a,users u
+        where a.aid = #{aid}
+        and u.uid = a.uid
+    </select>
+
+    <insert id="insertAppraise" keyProperty="aid" useGeneratedKeys="true">
+        insert into appraises(content,create_time,title,uid)
+        values(#{content},#{createTime},#{title},#{user.uid})
+    </insert>
+
+    <update id="updateAppraise">
+        update appraises
+        <set>
+            <if test="content != null">
+                content = #{content},
+            </if>
+            <if test="title != null">
+                title = #{title},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+            <if test="available != null">
+                available = #{available}
+            </if>
+        </set>
+        <where>
+            aid = #{aid}
+        </where>
+    </update>
+
+    <update id="updateAppraiseLikeCount">
+        update appraises
+        <set>
+            <if test="likes != null">
+                likes = #{likes}
+            </if>
+        </set>
+        <where>
+            aid = #{aid}
+        </where>
+    </update>
+
+    <select id="getAppraisesByUid" resultMap="appraise">
+        select a.aid,a.title,a.content,a.create_time,a.available,u.uid,u.name
+        from appraises a,users u
+        where a.uid = u.uid
+        and a.uid = #{uid}
+        order by a.available
+    </select>
+
+
+</mapper>

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:insert="common :: common">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="keywords"
+          content="admin, dashboard, bootstrap, template, flat, modern, theme, responsive, fluid, retina, backend, html5, css, css3">
+    <meta name="description" content="">
+    <meta name="author" content="ThemeBucket">
+    <link rel="shortcut icon" href="#" type="image/png">
+
+    <title>主页</title>
+
+</head>
+
+<body class="sticky-header">
+
+<div class="modal fade" id="response_detail" tabindex="-1" role="dialog" aria-labelledby="response_detail">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">回复详情</h4>
+            </div>
+            <div class="modal-body" id="modal_body">
+                <strong id="title"></strong>
+                <div id="author_info">
+
+                </div>
+                <!--分隔线-->
+                <hr color="#65cea7">
+                <div id="content">
+
+                </div>
+            </div>
+            <div class="modal-footer" id="modal-footer">
+                <button id="operationBtn" class="btn btn-success">同意回复</button>
+                <button class="btn btn-default" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<section>
+
+    <div th:replace="common::#left-menu"></div>
+
+    <!-- main content start-->
+    <div class="main-content">
+
+        <div th:replace="common::#header"></div>
+
+        <div class="wrapper">
+            <div class="row">
+                <div class="col-sm-12">
+                    <section class="panel">
+                        <header class="panel-heading">
+                            未审核回复列表
+                        </header>
+                        <div class="panel-body" style="display: block;">
+                            <table id="items_table" class="table  table-hover general-table">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>回复点评标题</th>
+                                    <th>回复用户名</th>
+                                    <th>回复时间</th>
+                                    <th>操作</th>
+                                </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                            <div class="row-fluid" id="page_footer">
+                                <div id="pageInfo"></div>
+                                <div class="col-md-6 col-md-offset-7" id="pagination"></div>
+                            </div>
+                        </div>
+
+                    </section>
+                </div>
+            </div>
+        </div>
+        <div th:replace="common :: #footer"></div>
+    </div>
+
+    <!-- main content end-->
+</section>
+
+
+<div th:replace="common::#footer_js"></div>
+<script th:replace="common::#function"></script>
+<script th:replace="common::#init"></script>
+<script th:replace="common::#appraiseAndResponseNav"></script>
+<script>
+
+    var curNum;
+
+    function to_page(pn) {
+        $.ajax({
+            url: "/response/ajaxDisableResponses",
+            data: {
+                pageNo: pn
+            },
+            success: function (result) {
+                buildTable(result);
+                buildPageInfo(result);
+                bulidPagination(result);
+            }
+        });
+    }
+
+    function acceptResponse(reid) {
+        $.ajax({
+            url: "/response/acceptResponse",
+            data: {
+                reid: reid
+            },
+            success: function (result) {
+                to_page(curNum);
+                alert(result.message);
+                $("#response_detail").modal('hide');
+
+            }
+        });
+    }
+
+    function getResponse(reid) {
+        $.ajax({
+            url: "/response/getResponseByReid",
+            data: {
+                reid: reid
+            },
+            success: function (result) {
+                buildModal(result)
+            }
+        })
+    }
+
+    function buildTable(result) {
+        $("#items_table tbody").empty();
+        var responses = result.data.pageInfo.list;
+        curNum = result.data.pageInfo.pageNum;
+        //$.each循环 第一个参数为 循环的列表 然后 第二个参数为对这些数据循环操作即方法（index，item）
+        $.each(responses, function (index, item) {
+            var reidTd = $("<td></td>").append(item.reid);
+            var titleTd = $("<td></td>").append(item.appraise.title);
+            var time = new Date(item.responseTime).format("yyyy-MM-dd hh:mm");
+            var responseTimeTd = $("<td></td>").append(time);
+            var nameTd = $("<td></td>").append(item.user.name);
+            var operationBtn = $("<button>查看</button>").addClass("btn btn-success btn-sm").attr("type", "button");
+            operationBtn.click(function () {
+                getResponse(item.reid);
+                $('#response_detail').modal({
+                    backdrop: true
+                });
+            });
+            var operationTd = $("<td></td>").append(operationBtn);
+
+            $("<tr></tr>")
+                .append(reidTd)
+                .append(titleTd)
+                .append(nameTd)
+                .append(responseTimeTd)
+                .append(operationTd)
+                .appendTo("#items_table tbody");
+        });
+    }
+
+    function buildModal(result) {
+        $("#title").text("");
+        $("#author_info").empty();
+        $("#content").empty();
+        var response = result.data.response;
+
+        //用户信息模块 头
+        var headImg = $("<img>").attr("src", response.user.src).attr("alt", "头像").addClass("img-circle").attr("width", "40px").attr("height", "40px");
+        var nameSpan = $("<span></span>").append("   " + response.user.name);
+        var time = new Date(response.responseTime).format("yyyy-MM-dd hh:mm");
+        var responseTimeDiv = $("<div></div>").append("回复于 " + time);
+        //正确的路径从后台拿取
+
+        //回复内容
+        var content_scriptDiv = $("<div></div>").append(response.content);
+
+        // 按钮组
+        $("#operationBtn").click(function () {
+            acceptResponse(response.reid);
+        });
+
+        $("#title").append("回复点评标题：" + response.appraise.title);
+        $("#author_info")
+            .append(headImg)
+            .append(nameSpan)
+            .append(responseTimeDiv);
+        $("#content")
+            .append(content_scriptDiv);
+    }
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:insert="common :: common">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="keywords"
+          content="admin, dashboard, bootstrap, template, flat, modern, theme, responsive, fluid, retina, backend, html5, css, css3">
+    <meta name="description" content="">
+    <meta name="author" content="ThemeBucket">
+    <link rel="shortcut icon" href="#" type="image/png">
+
+    <title>主页</title>
+
+</head>
+
+<body class="sticky-header">
+
+<div class="modal fade" id="appraise_detail" tabindex="-1" role="dialog" aria-labelledby="appraise_detail">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">点评信息</h4>
+            </div>
+            <div class="modal-body" id="modal_body">
+                <strong id="title"></strong>
+                <div id="author_info">
+
+                </div>
+                <!--分隔线-->
+
+                <hr color="#65cea7"/>
+                <div id="content">
+
+                </div>
+
+                <hr color="#65cea7"/>
+                回复：
+                <hr color="#000000">
+                <div id="responses">
+
+                </div>
+            </div>
+            <div class="modal-footer" id="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addAppraiseModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <form role="form" enctype="multipart/form-data" th:action="@{/appraise/addAppraise}" method="post">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title">新增点评</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <input type="text" class="form-control" required name="title" id="appraise_title" placeholder="点评标题">
+                    </div>
+                    <div class="form-group">
+                        <label for="photos">图片上传（注，上传的图片之后不可以更改）</label>
+                        <input type="file" name="photos" id="photos" multiple
+                            accept="image/jpeg,image/png"
+                        >
+                    </div>
+                    <label>点评内容：</label>
+                    <div id="editor">
+                    </div>
+                    <input type="hidden" name="appraise_content" id="appraise_content">
+                </div>
+                <div class="modal-footer">
+                    <button id="submit" type="submit" class="btn btn-default">提交</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<section>
+
+    <div th:replace="common::#left-menu"></div>
+
+    <!-- main content start-->
+    <div class="main-content">
+
+        <div th:replace="common::#header"></div>
+
+        <div class="wrapper">
+            <div class="row">
+                <div class="col-sm-12">
+                    <section class="panel">
+                        <header class="panel-heading">
+                            我的点评
+                            <button id="addAppraiseBtn" class="btn btn-info col-md-offset-10"><i class="fa fa-plus"></i>
+                                新增点评
+                            </button>
+                        </header>
+
+                        <div class="panel-body" style="display: block;">
+                            <table id="items_table" class="table  table-hover general-table">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>标题</th>
+                                    <th>创建用户名</th>
+                                    <th>创建时间</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                            <div class="row-fluid" id="page_footer">
+                                <div id="pageInfo"></div>
+                                <div class="col-md-6 col-md-offset-7" id="pagination"></div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+        <div th:replace="common :: #footer"></div>
+    </div>
+
+    <!-- main content end-->
+</section>
+
+
+<div th:replace="common::#footer_js"></div>
+<script th:replace="common::#function"></script>
+<script th:replace="common::#init"></script>
+<script th:replace="common::#appraiseAndResponseNav"></script>
+<script>
+
+    var curNum;
+
+    function to_page(pn) {
+        $.ajax({
+            url: "/appraise/myAppraises",
+            data: {
+                pageNo: pn
+            },
+            success: function (result) {
+                buildTable(result);
+                buildPageInfo(result);
+                bulidPagination(result);
+            }
+        });
+    }
+
+    function getAppraise(aid) {
+        $.ajax({
+            url: "/appraise/getAppraiseByAid",
+            data: {
+                aid: aid
+            },
+            success: function (result) {
+                buildModal(result);
+            }
+        });
+    }
+
+    function buildModal(result) {
+        $("#title").text("");
+        $("#author_info").empty();
+        $("#content").empty();
+        $("#responses").empty();
+        var appraise = result.data.appraise;
+
+        //用户信息模块 头
+        var headImg = $("<img>").addClass("img-circle").attr("src", appraise.user.src).attr("alt", "头像").attr("width", "40px").attr("height", "40px");
+        var nameSpan = $("<span></span>").append("   " + appraise.user.name);
+        var time = new Date(appraise.createTime).format("yyyy-MM-dd hh:mm");
+        var createTimeDiv = $("<div></div>").append("发布于 " + time);
+        var hr = $("<hr/>").attr("color","#65cea7");
+
+        //点评内容
+        var imgDiv = $("<div></div>");
+
+        $.each(result.data.appraise.imgs, function (index, item) {
+            var imgTmp = $("<img>").attr("src", item.src).attr("alt", "图片1").attr("width", "175px").attr("height", "175px");
+            imgTmp.appendTo(imgDiv);
+        });
+        var content_scriptDiv = $("<div></div>").append("<h3>" + appraise.content + "</h3>");
+
+        $.each(result.data.responses,function (index,response) {
+            var responseHeadImg = $("<img>").attr("src", response.user.src).attr("alt", "头像").addClass("img-circle").attr("width", "40px").attr("height", "40px");
+            var responseNameSpan = $("<span></span>").append("   " + response.user.name);
+            var responseTime = new Date(response.responseTime).format("yyyy-MM-dd hh:mm");
+            var responseTimeDiv = $("<div></div>").append("回复于 " + responseTime);
+            var responseContentDiv = $("<div></div>").append(response.content);
+            var responseEntry = $("<div></div>");
+            var userInfo = $("<div></div>")
+                .append(responseHeadImg)
+                .append(responseNameSpan)
+                .append(responseTimeDiv)
+                .appendTo("#responses");
+            var responseContent = $("<div></div>").attr("style","background:#e7eaed")
+                .append(responseContentDiv)
+                .appendTo("#responses");
+            responseEntry.append(userInfo).append(responseContent);
+            responseEntry.appendTo("#responses");
+        });
+
+        $("#title").append("标题：" + appraise.title);
+        $("#author_info")
+            .append(headImg)
+            .append(nameSpan)
+            .append(createTimeDiv);
+        $("#content")
+            .append(imgDiv)
+            .append(content_scriptDiv);
+    }
+
+    function deleteAppraise(aid) {
+        $.ajax({
+            url: "/appraise/deleteAppraiseByAid",
+            data: {
+                aid: aid
+            },
+            success: function (result) {
+                alert(result.message);
+                to_page(curNum);
+            }
+        });
+    }
+
+    function buildTable(result) {
+        $("#items_table tbody").empty();
+        var appraises = result.data.pageInfo.list;
+        curNum = result.data.pageInfo.pageNum;
+        //$.each循环 第一个参数为 循环的列表 然后 第二个参数为对这些数据循环操作即方法（index，item）
+        $.each(appraises, function (index, item) {
+            var aidTd = $("<td></td>").append(item.aid);
+            var titleTd = $("<td></td>").append(item.title);
+            var time = new Date(item.createTime).format("yyyy-MM-dd hh:mm");
+            var createTimeTd = $("<td></td>").append(time);
+            var nameTd = $("<td></td>").append(item.user.name);
+            var statusTd = $("<td></td>").append(item.available ? "审核通过" : "未审核");
+            var queryBtn = $("<button>查看</button>").addClass("btn btn-success btn-sm");
+            var updateBtn = $("<button>编辑</button>").addClass("btn btn-primary btn-sm");
+            var deleteBtn = $("<button>删除</button>").addClass("btn btn-danger btn-sm");
+            deleteBtn.click(function () {
+                if (confirm("您确定要删除标题为【" + item.title + "】的点评吗？") == true) {
+                    deleteAppraise(item.aid);
+                }
+            });
+            queryBtn.click(function () {
+                getAppraise(item.aid);
+                $('#appraise_detail').modal({
+                    backdrop: true
+                });
+            });
+            var operationTd = $("<td></td>").append(queryBtn).append(deleteBtn);
+            $("<tr></tr>")
+                .append(aidTd)
+                .append(titleTd)
+                .append(nameTd)
+                .append(createTimeTd)
+                .append(statusTd)
+                .append(operationTd)
+                .appendTo("#items_table tbody");
+        });
+    }
+
+    $("#addAppraiseBtn").click(function () {
+        $("#addAppraiseModal").modal({
+            backdrop: true
+        })
+    })
+
+    function validate(){
+        //检验上传的照片类型的
+        var obj = document.getElementById("photos");
+        var length = obj.files.length;
+        for(var i = 0; i < length; i++){
+            var file = obj.files[i]
+            var postfix = file.name.substr(file.name.lastIndexOf("."))
+            if(postfix !='.png' && postfix !='.jpg' && postfix !='.jpeg'){
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+
+
+</script>
+<!--富文本编辑器 WangEditor 相关-->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/wangeditor@latest/dist/wangEditor.min.js"></script>
+<script type="text/javascript">
+    <!--初始化-->
+    var E = window.wangEditor
+    var editor = new E('#editor')
+    //设置初始化的菜单
+    editor.config.menus = [
+        'head',
+        'bold',
+        'fontSize',
+        'fontName',
+        'italic',
+        'underline',
+        'strikeThrough',
+        'foreColor',
+        'backColor',
+        'list',
+        // 'emoticon',
+        'undo',
+        'redo'
+    ]
+
+    editor.create()
+
+    $("#submit").click(function () {
+        if(!validate()){
+            alert("请检查上传的是否都是图片！");
+            return false;
+        }
+        var html = editor.txt.html();
+        if(html.length == 0){
+            alert("内容不能为空");
+            return false;
+        }
+        $("#appraise_content").val(html);
+
+    });
+</script>
+</body>
+</html>

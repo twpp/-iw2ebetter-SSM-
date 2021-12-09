@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:insert="common :: common">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="keywords"
+          content="admin, dashboard, bootstrap, template, flat, modern, theme, responsive, fluid, retina, backend, html5, css, css3">
+    <meta name="description" content="">
+    <meta name="author" content="ThemeBucket">
+    <link rel="shortcut icon" href="#" type="image/png">
+
+    <title>主页</title>
+
+</head>
+
+<body class="sticky-header">
+
+<section>
+
+    <div th:replace="common::#left-menu"></div>
+
+    <!-- main content start-->
+    <div class="main-content">
+
+        <div th:replace="common::#header"></div>
+
+        <div class="wrapper">
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">个人基本信息</div>
+                        <div class="panel-body">
+                            <table>
+                                <tr>
+                                    <td><label>昵称</label>：</td>
+                                    <td><label th:text="${user.name}"></label></td>
+                                </tr>
+                                <tr>
+                                    <td><label>电话</label>：</td>
+                                    <td><label th:text="${user.telephone}"></label></td>
+                                </tr>
+                                <tr>
+                                    <td><label>居住地</label>：</td>
+                                    <td><label th:text="${user.address}"></label></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div th:replace="common :: #footer"></div>
+    </div>
+
+    <!-- main content end-->
+</section>
+
+<div th:replace="common::#footer_js"></div>
+<script th:replace="common::#init"></script>
+<script th:replace="common::#userNav"></script>
+</body>
+</html>
